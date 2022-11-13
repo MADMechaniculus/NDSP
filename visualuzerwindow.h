@@ -15,6 +15,8 @@ public:
     explicit VisualuzerWindow(QWidget *parent = nullptr);
     ~VisualuzerWindow();
 
+    void
+
 private:
     Ui::VisualuzerWindow *ui;
 };
