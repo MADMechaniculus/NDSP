@@ -1,0 +1,8 @@
+build
+builds
+doc
+docs
+*.cmake.*
+*.user
+CMakeCache
+CMakeFiles
