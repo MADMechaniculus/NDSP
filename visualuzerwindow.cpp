@@ -1,11 +1,13 @@
 #include "visualuzerwindow.h"
 #include "ui_visualuzerwindow.h"
 
-VisualuzerWindow::VisualuzerWindow(QWidget *parent) :
+VisualuzerWindow::VisualuzerWindow(dsp::Waveform && wave, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VisualuzerWindow)
 {
     ui->setupUi(this);
+
+    this->wave = std::make_shared<dsp::Waveform>(wave);
 
     // configure axis rect:
     this->ui->plotter->setInteractions(QCP::iRangeDrag|QCP::iRangeZoom); // this will also allow rescaling the color scale by dragging/zooming

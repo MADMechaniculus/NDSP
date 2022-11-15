@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="resize_h">res/resize_h.ico</file>
+        <file alias="resize_v">res/resize_v.ico</file>
+    </qresource>
+</RCC>

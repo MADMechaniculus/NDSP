@@ -50,6 +50,7 @@ static double waveletMHAT(double a, double b, double t) {
 class Waveform {
 public:
 
+    // Типы созможных данных
     enum Waveform_DataType_ : uint16_t {
         Waveform_DataType_int16_iq,
         Waveform_DataType_int32_iq,
@@ -61,6 +62,13 @@ public:
         Waveform_DataType_double_plain,
         Waveform_DataType_unknown
     };
+
+    // Дополнительные сведения
+    typedef struct {
+        std::string name;
+        std::string description;
+        double sampleRate;
+    } metadata_t;
 
 protected:
 
@@ -75,7 +83,7 @@ protected:
         } else if (std::is_same<T, datatypes::double_iq_t>::value) {
             return Waveform_DataType_double_iq;
         } else {
-            return ~((uint16_t)0x0);
+            return (uint16_t)(~0x0);
         }
     }
 
@@ -84,8 +92,6 @@ protected:
     uint16_t currentType;
 
 public:
-    Waveform() {}
-
     Waveform(const Waveform & other) {
         this->memory = malloc(other.memorySize);
         this->memorySize = other.memorySize;
@@ -94,19 +100,56 @@ public:
         this->currentType = other.currentType;
     }
 
-    Waveform(const Waveform && other);
+    Waveform(const Waveform && other) {
+        this->memory = malloc(other.memorySize);
+        this->memorySize = other.memorySize;
+
+        std::memcpy(this->memory, other.memory, this->memorySize);
+        this->currentType = other.currentType;
+    }
 
     template<typename T>
     Waveform(std::vector<double> & timeline, std::vector<T> & data) {
         if (timeline.size() != data.size())
             throw std::runtime_error("Timeline duration not equal to data");
 
-        Waveform wave;
         memorySize = data.size() * sizeof (T);
-        wave.memory = malloc(memorySize);
-        std::memcpy(memory, data.data(), memorySize);
+        this->memory = malloc(memorySize);
+        std::memcpy(this->memory, data.data(), memorySize);
 
         this->currentType = getType<T>();
+        if (this->currentType == (uint16_t)(~0x0)) {
+            throw std::runtime_error("Unsupported data type");
+        }
+    }
+
+    template<typename T>
+    Waveform(std::vector<double> & timeline, T * data, uint64_t size /* count of element type T */) {
+        if (timeline.size() != size)
+            throw std::runtime_error("Timeline duration not equal to data");
+
+        memorySize = size * sizeof (T);
+        this->memory = malloc(memorySize);
+        std::memcpy(this->memory, data, memorySize);
+
+        this->currentType = getType<T>();
+        if (this->currentType == (uint16_t)(~0x0)) {
+            throw std::runtime_error("Unsupported data type");
+        }
+    }
+
+    /**
+     * @brief Указатель на данные внутри объекта
+     */
+    void const * data(void) {
+        return this->memory;
+    }
+
+    /**
+     * @brief Размер блока данных внутри объекта
+     */
+    uint64_t size(void) const {
+        return this->memorySize;
     }
 };
 

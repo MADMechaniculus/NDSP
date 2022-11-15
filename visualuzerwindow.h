@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 
+#include "dsp.hpp"
+
+namespace dsp = niistt::dsp;
+
 namespace Ui {
 class VisualuzerWindow;
 }
@@ -10,12 +14,11 @@ class VisualuzerWindow;
 class VisualuzerWindow : public QMainWindow
 {
     Q_OBJECT
+    std::shared_ptr<dsp::Waveform> wave;
 
 public:
-    explicit VisualuzerWindow(QWidget *parent = nullptr);
+    explicit VisualuzerWindow(dsp::Waveform && wave, QWidget *parent = nullptr);
     ~VisualuzerWindow();
-
-    void
 
 private:
     Ui::VisualuzerWindow *ui;

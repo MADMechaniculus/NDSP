@@ -26,6 +26,8 @@ set(PROJECT_SOURCES
         visualuzerwindow.cpp
         visualuzerwindow.ui
 
+        resources.qrc
+
         dsp.hpp
 )
 
