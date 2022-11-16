@@ -7,7 +7,7 @@ WaveletMainWindow::WaveletMainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    viz = new VisualuzerWindow(this);
+//    viz = new VisualuzerWindow(this);
 }
 
 WaveletMainWindow::~WaveletMainWindow()

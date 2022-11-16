@@ -26,6 +26,10 @@ set(PROJECT_SOURCES
         visualuzerwindow.cpp
         visualuzerwindow.ui
 
+        waveformopeningdialog.h
+        waveformopeningdialog.cpp
+        waveformopeningdialog.ui
+
         resources.qrc
 
         dsp.hpp

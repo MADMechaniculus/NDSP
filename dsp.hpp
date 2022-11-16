@@ -1,12 +1,15 @@
 #ifndef DSP_HPP
 #define DSP_HPP
 
+#include <QCustomPlot/qcustomplot.h>
+
 #include <cmath>
 #include <vector>
 #include <cstdint>
 #include <string>
 #include <cstring>
 #include <fstream>
+#include <functional>
 
 namespace niistt {
 
@@ -87,25 +90,33 @@ protected:
         }
     }
 
-    void * memory;
+    // TODO
+    // Copy timeline
+
+    void * memoryData;
+    QVector<double> timeline;
     uint64_t memorySize;
     uint16_t currentType;
+    uint16_t sizeofItem;
+    std::function<void(QCPGraph *)> drawer;
 
 public:
     Waveform(const Waveform & other) {
-        this->memory = malloc(other.memorySize);
+        this->memoryData = malloc(other.memorySize);
         this->memorySize = other.memorySize;
 
-        std::memcpy(this->memory, other.memory, this->memorySize);
+        std::memcpy(this->memoryData, other.memoryData, this->memorySize);
         this->currentType = other.currentType;
+        this->sizeofItem = other.sizeofItem;
     }
 
     Waveform(const Waveform && other) {
-        this->memory = malloc(other.memorySize);
+        this->memoryData = malloc(other.memorySize);
         this->memorySize = other.memorySize;
 
-        std::memcpy(this->memory, other.memory, this->memorySize);
+        std::memcpy(this->memoryData, other.memoryData, this->memorySize);
         this->currentType = other.currentType;
+        this->sizeofItem = other.sizeofItem;
     }
 
     template<typename T>
@@ -114,10 +125,11 @@ public:
             throw std::runtime_error("Timeline duration not equal to data");
 
         memorySize = data.size() * sizeof (T);
-        this->memory = malloc(memorySize);
-        std::memcpy(this->memory, data.data(), memorySize);
+        this->memoryData = malloc(memorySize);
+        std::memcpy(this->memoryData, data.data(), memorySize);
 
         this->currentType = getType<T>();
+        this->sizeofItem = sizeof (T);
         if (this->currentType == (uint16_t)(~0x0)) {
             throw std::runtime_error("Unsupported data type");
         }
@@ -129,10 +141,11 @@ public:
             throw std::runtime_error("Timeline duration not equal to data");
 
         memorySize = size * sizeof (T);
-        this->memory = malloc(memorySize);
-        std::memcpy(this->memory, data, memorySize);
+        this->memoryData = malloc(memorySize);
+        std::memcpy(this->memoryData, data, memorySize);
 
         this->currentType = getType<T>();
+        this->sizeofItem = sizeof (T);
         if (this->currentType == (uint16_t)(~0x0)) {
             throw std::runtime_error("Unsupported data type");
         }
@@ -142,7 +155,7 @@ public:
      * @brief Указатель на данные внутри объекта
      */
     void const * data(void) {
-        return this->memory;
+        return this->memoryData;
     }
 
     /**
@@ -150,6 +163,21 @@ public:
      */
     uint64_t size(void) const {
         return this->memorySize;
+    }
+
+    /**
+     * @brief Получение размерности одно элемента
+     */
+    uint16_t itemSize(void) const {
+        return this->sizeofItem;
+    }
+
+    void setDrawer(std::function<void(QCPGraph *)> drawer) {
+        drawer = drawer;
+    }
+
+    void draw(QCPGraph * graph) {
+        this->drawer(graph);
     }
 };
 
