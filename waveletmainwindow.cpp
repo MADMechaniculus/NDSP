@@ -18,6 +18,15 @@ WaveletMainWindow::~WaveletMainWindow()
 
 void WaveletMainWindow::on_pushButton_clicked()
 {
-    this->viz->show();
+    QString path = "";
+    uint16_t dataType = 0;
+
+    WaveFormOpeningDialog dialog(path, dataType, this);
+
+    int ret = dialog.exec();
+    if (ret == 0) {
+        // Success
+    }
+    // Fail
 }
 

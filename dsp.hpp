@@ -55,16 +55,40 @@ public:
 
     // Типы созможных данных
     enum Waveform_DataType_ : uint16_t {
-        Waveform_DataType_int16_iq,
-        Waveform_DataType_int32_iq,
-        Waveform_DataType_float_iq,
-        Waveform_DataType_double_iq,
-        Waveform_DataType_int16_plain,
-        Waveform_DataType_itn32_plain,
-        Waveform_DataType_float_plain,
-        Waveform_DataType_double_plain,
-        Waveform_DataType_unknown
+        Waveform_DataType_int16_iq = 0,
+        Waveform_DataType_int32_iq = 1,
+        Waveform_DataType_float_iq = 2,
+        Waveform_DataType_double_iq = 3,
+        Waveform_DataType_int16_plain = 4,
+        Waveform_DataType_itn32_plain = 5,
+        Waveform_DataType_float_plain = 6,
+        Waveform_DataType_double_plain = 7,
+        Waveform_DataType_unknown = 8
     };
+
+    // Получение строки с названием элемента перечисления типов данных
+    static const char* Waveform_DataType_ItemName(uint16_t index) {
+        switch (index) {
+        case Waveform_DataType_int16_iq:
+            return "Waveform_DataType_int16_iq";
+        case Waveform_DataType_int32_iq:
+            return "Waveform_DataType_int32_iq";
+        case Waveform_DataType_float_iq:
+            return "Waveform_DataType_float_iq";
+        case Waveform_DataType_double_iq:
+            return "Waveform_DataType_double_iq";
+        case Waveform_DataType_int16_plain:
+            return "Waveform_DataType_int16_plain";
+        case Waveform_DataType_itn32_plain:
+            return "Waveform_DataType_itn32_plain";
+        case Waveform_DataType_float_plain:
+            return "Waveform_DataType_float_plain";
+        case Waveform_DataType_double_plain:
+            return "Waveform_DataType_double_plain";
+        default:
+            return "Waveform_DataType_unknown";
+        }
+    }
 
     // Дополнительные сведения
     typedef struct {
@@ -172,10 +196,18 @@ public:
         return this->sizeofItem;
     }
 
+    /**
+     * @brief Передача функции вывода данных
+     * @param drawer Функция вывода
+     */
     void setDrawer(std::function<void(QCPGraph *)> drawer) {
         drawer = drawer;
     }
 
+    /**
+     * @brief Функция отрисовки на графе
+     * @param graph Целевой граф
+     */
     void draw(QCPGraph * graph) {
         this->drawer(graph);
     }
