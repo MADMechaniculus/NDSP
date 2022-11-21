@@ -8,6 +8,8 @@ VisualuzerWindow::VisualuzerWindow(dsp::Waveform && wave, QWidget *parent) :
     ui->setupUi(this);
 
     this->wave = std::make_shared<dsp::Waveform>(wave);
+
+    this->wave->draw(this->ui->plotter);
 }
 
 VisualuzerWindow::~VisualuzerWindow()
