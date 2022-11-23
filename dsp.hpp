@@ -10,6 +10,7 @@
 #include <cstring>
 #include <fstream>
 #include <functional>
+#include <cstdlib>
 
 namespace niistt {
 
@@ -49,6 +50,59 @@ typedef struct {
 static double waveletMHAT(double a, double b, double t) {
     return (1.0 / std::sqrt(a)) * std::exp(-0.5 * std::pow((t - b) / a, 2)) * (std::pow((t - b) / 2, 2) - 1);
 }
+
+class FileWatcher {
+protected:
+
+    static constexpr uint64_t windowSize = 64 * 1024 * 1024;
+
+    std::ifstream fileStream;
+    uint64_t fileSize;
+    uint64_t fileOffset;
+
+    void * windowData = nullptr;
+
+public:
+    enum UpdateOffset_Direction_ : uint8_t {
+        UpdateOffset_Direction_Left,
+        UpdateOffset_Direction_Right
+    };
+
+    static constexpr uint64_t visibleSize = 48 * 1024 * 1024;
+
+    FileWatcher(std::ifstream && file, uint64_t fileSize) : fileStream(std::move(file)) {
+        this->fileSize = fileSize;
+        this->fileOffset = 0;
+
+        this->windowData = std::malloc(this->windowSize);
+        if (this->windowData == nullptr) {
+            throw std::runtime_error("Bad memory alloc");
+        }
+
+        this->fileStream.read((char*)this->windowData, this->windowSize);
+    }
+
+    void * visibleData() {
+        return (uint8_t *)this->windowData + this->fileOffset;
+    }
+
+    void updateOffset(uint64_t delta, uint8_t direction) {
+        switch (direction) {
+        case UpdateOffset_Direction_Left:
+            if (this->fileOffset < delta)
+                this->fileOffset = 0;
+            break;
+        case UpdateOffset_Direction_Right:
+            if ((this->fileOffset + delta) >= (this->fileSize - this->visibleSize))
+                this->fileOffset = this->fileSize - this->visibleSize;
+            break;
+        }
+    }
+
+    ~FileWatcher() {
+        std::free(this->windowData);
+    }
+};
 
 class Waveform {
 public:
@@ -124,6 +178,10 @@ protected:
     uint16_t sizeofItem;
     std::shared_ptr<std::function<void(Waveform *, QCustomPlot *)>> drawer;
 
+    std::ifstream fileStream;
+    uint64_t fileSize;
+    uint64_t fileOffset;
+
 public:
     const QVector<double> & publicTimeline(void) {
         return this->timeline;
@@ -179,6 +237,10 @@ public:
         }
     }
 
+    Waveform(std::ifstream && input, uint64_t fileSize) : fileStream(std::move(input)) {
+
+    }
+
     /**
      * @brief Указатель на данные внутри объекта
      */
@@ -214,6 +276,35 @@ public:
      */
     void draw(QCustomPlot * plotter) {
         this->drawer.get()->operator()(this, plotter);
+    }
+
+    friend class QCustomPlotDrawers;
+};
+
+class QCustomPlotDrawers {
+
+    static void addIqGraphs(QCustomPlot * plotter) {
+        plotter->clearGraphs();
+
+        plotter->addGraph();
+        plotter->addGraph();
+    }
+
+public:
+    static void drawer_int16_iq(QCustomPlot * plotter) {
+        addIqGraphs(plotter);
+    }
+
+    static void drawer_int32_iq(QCustomPlot * plotter) {
+
+    }
+
+    static void drawer_float_iq(QCustomPlot * plotter) {
+
+    }
+
+    static void drawer_double_iq(QCustomPlot * plotter) {
+
     }
 };
 
